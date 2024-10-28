@@ -85,17 +85,19 @@ class MainController extends Controller
         }
 
         // Логика с заказами
-        $query->whereDoesntHave('orders')
-            ->orWhereHas('orders', function ($query) {
-                $query->where('status', 'cancelled')
-                    ->latest()
-                    ->limit(1);
-            })
-            ->whereDoesntHave('orders', function ($query) {
-                $query->whereIn('status', ['pending', 'delivered'])
-                    ->latest()
-                    ->limit(1);
-            });
+        $query->where(function ($q) {
+            $q->whereDoesntHave('orders')
+                ->orWhereHas('orders', function ($q) {
+                    $q->where('status', 'cancelled')
+                        ->latest()
+                        ->limit(1);
+                })
+                ->whereDoesntHave('orders', function ($q) {
+                    $q->whereIn('status', ['pending', 'delivered'])
+                        ->latest()
+                        ->limit(1);
+                });
+        });
 
         $cars = $query->get();
 
